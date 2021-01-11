@@ -214,7 +214,83 @@ public class Functions {
 
     // SEPARACIÓN DE CONSULTAS DE COMANDO
     // Las funciones deben hacer algo o responder a algo pero no ambas cosas.
+    // public boolean set(String attribute, String value);
+    // if(set("username", "david")) // --> ¿Qué significa esto? si username es david o si se ha asignado david a username??
+    // if(attributeExists("username")) {
+    //  setAttribute("username", "david");
+    // }
 
+    // MEJOR EXCEPCIONES QUE DEVOLVER CÓDIGOS DE ERROR
+    // Los códigos de error incumplen la separación de comandos de consulta. Hace que los comandos usados asciendan
+    // a expresiones en los predicados de las instrucciones if. Genera estructuras anidadas.
+    // MAL
+    // ========
+    if(deletePage(page) == E_OK) {
+        if(registry.deleteReference(page.name) == E_OK) {
+            logger.log("page deleted"):
+        } else {
+            logger.log("configKey not deleted");
+        }
+    }
+    else {
+        logger.log("delete failed");
+        return E_ERROR;
+    }
+
+    // BIEN
+    // ========
+    try {
+        deletePage(page);
+        registry.deleteReference(page.name);
+        configKeys.deleteKey(page.name.makeKey());
+    } catch(Exception ex) {
+        logger.log(ex.getMessage());
+    }
+
+    // EXTRAER BLOQUES TRY/CATCH
+    // Es conveniente extraer el cuerpo de los bloques try catch en funciones individuales
+    try {
+        deletePageAndAllReferences(page);
+    } catch (Exception ex) {
+        logError(ex);
+    }
+
+    private void deletePageAndAllReferences(Page page) trhows Exception {
+        deletePage(page);
+        registry.deleteReference(page.name.makeKey());
+        configKeys.deleteKey(page.name.makeKey());
+    }
+
+    private void logError(Exception ex) {
+        logger.log(ex.getMessage());
+    }
+
+    // EL PROCESAMIENTO DE ERRORES ES UNA COSA
+    // Las funciones deben hacer una cosa y el procesamiento de errores es una de ellas. Si una función incluye la
+    // palabra clave try, debe ser la primera de la función y que no debe haber nada más después de los bloques catch/finally
+
+    // EL IMAN DE DEPENDENCIAS Error.java
+    // Esta clase es un imán para generar dependencias. Al implementar una nueva excepción, está deriva de la clase
+    // base excepcion y no implica ningún cambio en el código.
+    public enum Error {
+        OK,
+        INVALID,
+        NO_SUCH,
+        LOCKED,
+        OUT_OF_RESOURCES,
+        WAITING_FOR_EVENT
+    }
+
+    // NO REPETIRSE
+
+    // PROGRAMACIÓN ESTRUCTURADA
+    // Dijkstra afirma que todas las funciones y todos los bloques de una función deben tener una entrada y una salida.
+    // Esto no es tan importante en el caso de funciones de tamaño reducido.
+
+    // COMO CREAR ESTE TIPO DE FUNCIONES
+    // Dar ejemplos sobre cómo abordar la creación de funciones complejas.
+
+    // TODO: Implementar el código al final del capítulo
 }
 
 class PageData {
